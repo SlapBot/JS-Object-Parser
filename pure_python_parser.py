@@ -1,8 +1,8 @@
 import demjson
 
-def parse_json(input_text):
+def parse_json(input_text, delimeters):
     input_text = input_text.strip()
-    formatted_text = replace_strings(input_text, ["runsOnDays", "trnName"])
+    formatted_text = replace_strings(input_text, delimeters)
     return demjson.decode(formatted_text)
 
 def find_string_indices(input_text, delimeter):
@@ -445,5 +445,5 @@ _variable_1532760115940=[ {
 ]
 '''
 
-data = parse_json(input_text)
+data = parse_json(input_text, ["runsOnDays", "trnName"])
 print(data)
