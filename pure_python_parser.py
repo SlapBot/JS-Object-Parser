@@ -1,39 +1,36 @@
-import json
-from subprocess import call
+import demjson
+
+def parse_json(input_text):
+    base_index_length = len(",runsOnDays")
+    function_call = input_text.split(",runsOnDays")
+    first_function_call_start_index = len(function_call[0])
+    first_function_call_end_index = base_index_length + first_function_call_start_index + len(function_call[1].split(",")[0])
+    second_function_call_start_index = len(function_call[0]) +len(function_call[1]) + base_index_length
+    second_function_call_end_index = base_index_length + second_function_call_start_index + len(function_call[2].split(",")[0])
+
+    anonymous_base_index_length = len("trnName")
+    anonymous_function_call = input_text.split("trnName")
+    first_anonymous_function_call_start_index = len(anonymous_function_call[0])
+    first_anonymous_function_call_end_index = anonymous_base_index_length + first_anonymous_function_call_start_index + len(anonymous_function_call[1].split(",")[0]) + 1
+    second_anonymous_function_call_start_index = len(anonymous_function_call[0]) + len(anonymous_function_call[1]) + anonymous_base_index_length
+    second_anonymous_function_call_end_index = anonymous_base_index_length + second_anonymous_function_call_start_index + len(anonymous_function_call[2].split(",")[0]) + 1
+
+    replaceable_strings = [
+        input_text[first_function_call_start_index:first_function_call_end_index],
+        input_text[second_function_call_start_index:second_function_call_end_index],
+        input_text[first_anonymous_function_call_start_index:first_anonymous_function_call_end_index],
+        input_text[second_anonymous_function_call_start_index:second_anonymous_function_call_end_index]
+    ]
+
+    for string in replaceable_strings:
+        input_text = input_text.replace(string, '')
+
+    input_text = input_text.replace("=", ":")
+    formatted_text = "{" + input_text.strip() + "}"
+    return demjson.decode(formatted_text)
 
 
-def get_json(input_text, file_path_js, file_path_json):
-    root_variable_name = input_text.strip().split("=", 1)[0]
-    required_function = '''
-        function getDaysOfRunString(text) {
-            return text
-        }
-    '''
-    json_file_outputter_function = '''
-        function json_outputter(variable) {
-            json_text = JSON.stringify(variable)
-            var fs = require('fs');
-            fs.writeFile("''' + file_path_json + '''", json_text, function(err) {
-                if(err) {
-                    return console.log(err);
-                }
-                console.log("The file was saved!");
-            }); 
-        }
-    '''
-    output_call = f"json_outputter({root_variable_name})"
-    new_text = required_function + input_text + json_file_outputter_function + output_call
-    trimmed_text = new_text.strip()
-    print(trimmed_text)
-    with open(file_path_js, "w") as jsFile:
-        jsFile.write(trimmed_text)
-    call(["nodejs", file_path_js])
-    with open(file_path_json, 'r') as jsonFile:
-        train_data = json.load(jsonFile)
-    return train_data
-
-
-raw_json_text = '''
+input_text = '''
 
 _variable_1532760115940=[ {
 	trainDataFound:"trainRunningDataFound",trainNo:"19016",trainName:"SAURASHTRA EXP",from:"PBR",to:"MMCT",schArrTime:"19:15",schDepTime:"21:05",dayCnt:1,runsOn:"1111111",runsOnDays:getDaysOfRunString("1111111"),trainType:"MEX", 
@@ -433,8 +430,8 @@ _variable_1532760115940=[ {
 	},
 	rakes:[
 	]}
-]
-'''
+]'''
 
-train_data = get_json(raw_json_text, '/home/slapbot/my_side_projects/train_data_parser/train_data.js', '/home/slapbot/my_side_projects/train_data_parser/train_data.json')
-print(train_data)
+
+data = parse_json(input_text)
+print(data)
