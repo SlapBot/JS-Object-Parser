@@ -1,5 +1,7 @@
 # Train Data Parser
 
+For : github.com/Arion_Miles
+
 ## Setup:
 
 Install Nodejs:
