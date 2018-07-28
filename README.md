@@ -8,7 +8,7 @@ Install demjson: `pip install demjson`
 
 ### How to run?
 
-`python train_data_parser.py`
+`python pure_python_parser.py`
 
 ### Instructions
 
