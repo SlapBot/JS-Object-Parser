@@ -1,33 +1,45 @@
 import demjson
 
 def parse_json(input_text):
-    base_index_length = len(",runsOnDays")
-    function_call = input_text.split(",runsOnDays")
-    first_function_call_start_index = len(function_call[0])
-    first_function_call_end_index = base_index_length + first_function_call_start_index + len(function_call[1].split(",")[0])
-    second_function_call_start_index = len(function_call[0]) +len(function_call[1]) + base_index_length
-    second_function_call_end_index = base_index_length + second_function_call_start_index + len(function_call[2].split(",")[0])
+    input_text = input_text.strip()
+    formatted_text = replace_strings(input_text, ["runsOnDays", "trnName"])
+    return demjson.decode(formatted_text)
 
-    anonymous_base_index_length = len("trnName")
-    anonymous_function_call = input_text.split("trnName")
-    first_anonymous_function_call_start_index = len(anonymous_function_call[0])
-    first_anonymous_function_call_end_index = anonymous_base_index_length + first_anonymous_function_call_start_index + len(anonymous_function_call[1].split(",")[0]) + 1
-    second_anonymous_function_call_start_index = len(anonymous_function_call[0]) + len(anonymous_function_call[1]) + anonymous_base_index_length
-    second_anonymous_function_call_end_index = anonymous_base_index_length + second_anonymous_function_call_start_index + len(anonymous_function_call[2].split(",")[0]) + 1
+def find_string_indices(input_text, delimeter):
+    base_index_length = len(delimeter)
+    function_call = input_text.split(delimeter)
+    indices = []
+    for i in range(0, len(function_call)-1):
+        if i == 0:
+            first_function_call_start_index = len(function_call[i])
+        else:
+            first_function_call_start_index = len(function_call[i]) + get_sum(indices) + base_index_length            
+        first_function_call_end_index = base_index_length + first_function_call_start_index + len(function_call[i+1].split(",")[0]) + 1
+        indices.append([first_function_call_start_index, first_function_call_end_index])
+    return indices
 
-    replaceable_strings = [
-        input_text[first_function_call_start_index:first_function_call_end_index],
-        input_text[second_function_call_start_index:second_function_call_end_index],
-        input_text[first_anonymous_function_call_start_index:first_anonymous_function_call_end_index],
-        input_text[second_anonymous_function_call_start_index:second_anonymous_function_call_end_index]
-    ]
+def get_sum(indices):
+    all_sum = 0
+    for indice in indices:
+        all_sum += indice[0]
+    return all_sum
 
+def get_replaceable_strings(input_text, indices):
+    replaceable_strings = []
+    for indice in indices:
+        replaceable_strings.append(input_text[indice[0]:indice[1]])
+    return replaceable_strings
+
+def replace_strings(input_text, delimeters):
+    indices = []
+    for delimeter in delimeters:
+        indices.extend(find_string_indices(input_text, delimeter))
+    replaceable_strings = get_replaceable_strings(input_text, indices)
     for string in replaceable_strings:
         input_text = input_text.replace(string, '')
-
     input_text = input_text.replace("=", ":")
-    formatted_text = "{" + input_text.strip() + "}"
-    return demjson.decode(formatted_text)
+    formatted_text = "{" + input_text + "}"
+    return formatted_text
 
 
 input_text = '''
@@ -430,8 +442,8 @@ _variable_1532760115940=[ {
 	},
 	rakes:[
 	]}
-]'''
-
+]
+'''
 
 data = parse_json(input_text)
 print(data)
