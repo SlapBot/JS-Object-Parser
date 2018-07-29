@@ -1,4 +1,4 @@
-# Train Data Parser
+# JS Object Parser
 
 For : github.com/Arion_Miles
 
